@@ -13,6 +13,7 @@ pipeline {
            }
            stage('Integration Testing'){
                steps{
+                   sh "mysql -h localhost -P 3306 -u root -p"
                    sh "mvn verify -DskipUnitTests"
                }
            }
