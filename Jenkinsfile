@@ -3,7 +3,7 @@ pipeline {
        stages{
            stage('Git Checkout'){
                steps{
-                   git branch: 'OussamaKoussaier', url: 'https://github.com/oussamakoussaier/Project-DevOps.git'
+                   git branch: 'Master', url: 'https://github.com/oussamakoussaier/test.git'
                }
            }
         stage('Upload War File to Nexus'){
