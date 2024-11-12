@@ -1,0 +1,51 @@
+pipeline {
+    agent any
+         environment {
+        NVD_API_KEY = '0bfb1a0f-8c1c-4c46-8dbf-fed7c645828d'  
+        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
+            }
+        stages {
+            stage('Git Checkout and Secrets Scan') {
+                steps {
+                    sh 'docker pull gesellix/trufflehog'
+                    sh 'docker run -t gesellix/trufflehog --json https://github.com/devopssecure/webapp.git > trufflehog'
+                  }
+        }
+            stage('Dependency Check') {
+                steps {
+                dependencyCheck additionalArguments: '--format HTML --nvdApiKey $NVD_API_KEY', odcInstallation: 'DP-check'
+            }
+        }
+            stage('Integration Testing and DAST with OWASP ZAP') {
+                steps {
+                    script {
+                        sh 'docker run -d -p 8080:8080 --name zaproxy --network mynetwork zaproxy/zap-stable zap.sh -daemon -port 8080 -config api.disablekey=true'
+            
+                        sleep 30
+            
+                        sh """
+                        curl -X POST http://localhost:8080/JSON/ascan/action/scan \
+                        -d 'url=https://github.com/oussamakoussaier/Project-DevOps.git' \
+                        -d 'recurse=true' \
+                        -d 'inScopeOnly=false' \
+                        -d 'scanContext=default'
+                        """
+            
+                        sh 'mvn verify -DskipUnitTests'
+
+                        sh 'docker stop zaproxy'
+
+                    }
+                }
+            }
+            stage('Static Code Analysis') {
+                steps {
+                    script {
+                        withSonarQubeEnv(credentialsId: 'sonar-api-key') {
+                        sh 'mvn clean package sonar:sonar'
+            }
+        }
+    }
+}
+    }
+}
