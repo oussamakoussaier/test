@@ -74,12 +74,11 @@ pipeline {
         stage('Push Image To DockerHub'){
             steps{
                 script{
-                    withCredentials([string(credentialsId: 'dockerHub_pwd', variable: 'dockerhub_cred')]) {
-                        sh"docker login -u oussama769 -p ${dockerhub_cred}"
+                        sh"docker login -u oussama769 -p ouskous123@@"
                         sh"docker image push oussama769/$JOB_NAME:v1.$BUILD_ID"
                         sh"docker image push oussama769/$JOB_NAME:latest"
                         
-                    }
+                    
                 }
             }
         }
