@@ -24,7 +24,7 @@ pipeline {
             
                         sh """
                         curl -X POST http://localhost:8080/JSON/ascan/action/scan \
-                        -d 'url=https://github.com/oussamakoussaier/Project-DevOps.git' \
+                        -d 'url=https://github.com/oussamakoussaier/test.git' \
                         -d 'recurse=true' \
                         -d 'inScopeOnly=false' \
                         -d 'scanContext=default'
