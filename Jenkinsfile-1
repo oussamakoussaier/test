@@ -69,7 +69,7 @@ pipeline {
                         nexusUrl: '192.168.33.10:8081',
                         nexusVersion: 'nexus3', 
                         protocol: 'http',
-                        repository: nexusRepo,
+                        repository: 'demoapp-release',
                         version: '1.0'
                     }
                 }
@@ -82,8 +82,8 @@ pipeline {
             // Run Trivy container security scan
                         sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy --exit-code 1 --no-progress --severity HIGH,CRITICAL $JOB_NAME:v1.$BUILD_ID'
             // Tag the Docker image
-                        sh "docker tag $JOB_NAME:v1.$BUILD_ID mohamedoussama.koussaiet@esprit.tn/$JOB_NAME:v1.$BUILD_ID"
-                        sh "docker tag $JOB_NAME:v1.$BUILD_ID mohamedoussama.koussaiet@esprit.tn/$JOB_NAME:latest"
+                        sh "docker tag $JOB_NAME:v1.$BUILD_ID oussama769/$JOB_NAME:v1.$BUILD_ID"
+                        sh "docker tag $JOB_NAME:v1.$BUILD_ID oussama769/$JOB_NAME:latest"
                     }
                 }
             }
