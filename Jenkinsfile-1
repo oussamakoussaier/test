@@ -10,9 +10,34 @@ pipeline {
                     sh 'docker run -t gesellix/trufflehog --json https://github.com/oussamakoussaier/test.git > trufflehog'
                   }
         }
-            stage('Dependency Check') {
-                steps {
+        stage('Dependency Check') {
+            steps {
                 dependencyCheck additionalArguments: '--format HTML --nvdApiKey $NVD_API_KEY', odcInstallation: 'DP-check'
+            }
+        }
+     // 3. Static Application Security Testing (SAST)
+        stage('SAST with CodeQL') {
+            steps {
+                script {
+                    sh 'docker run --rm -v $(pwd):/src github/codeql/codeql-cli:latest --scan /src'
+                }
+            }
+        }    
+         // 4. Software Composition Analysis (SCA) with Snyk
+        stage('SCA with Snyk') {
+            steps {
+                script {
+                    sh 'docker run --rm snyk/snyk-cli test --all-projects'
+                }
+            }
+        }
+
+        // 5. Infrastructure as Code (IaC) Security Scanning with Checkov
+        stage('IaC Security Scan with Checkov') {
+            steps {
+                script {
+                    sh 'docker run --rm -v $(pwd):/workspace checkov -d /workspace'
+                }
             }
         }
             stage('Integration Testing and DAST with OWASP ZAP') {
