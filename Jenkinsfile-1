@@ -18,7 +18,7 @@ pipeline {
         stage('SAST with CodeQL') {
             steps {
                 
-                    sh 'docker run --rm -v $(pwd):/src github/codeql/codeql-cli:latest --scan /src'
+                    sh 'docker run --rm -v $(pwd):/src codeql/codeql-cli:latest --scan /src'
                     
                 }
             }
