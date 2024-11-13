@@ -7,7 +7,7 @@ pipeline {
             stage('Git Checkout and Secrets Scan') {
                 steps {
                     sh 'docker pull gesellix/trufflehog'
-                    sh 'docker run -t gesellix/trufflehog --json https://github.com/oussamakoussaier/test.git > trufflehog'
+                    sh 'docker run -t gesellix/trufflehog --json https://github.com/devopssecure/webapp.git > trufflehog'
                   }
         }
         stage('Dependency Check') {
