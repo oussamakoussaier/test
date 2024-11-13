@@ -12,30 +12,30 @@ pipeline {
         }
             stage('Dependency Check') {
                 steps {
-                dependencyCheck additionalArguments: '--format HTML --nvdApiKey $NVD_API_KEY', odcInstallation: 'DP-check'
+                    dependencyCheck additionalArguments: '--format HTML --nvdApiKey $NVD_API_KEY', odcInstallation: 'DP-check'
             }
         }
         stage('SAST with CodeQL') {
             steps {
-                script {
+                
                     sh 'docker run --rm -v $(pwd):/src github/codeql/codeql-cli:latest --scan /src'
-                    }
+                    
                 }
             }
         // 4. Software Composition Analysis (SCA) with Snyk
         stage('SCA with Snyk') {
             steps {
-                script {
+                
                     sh 'docker run --rm snyk/snyk-cli test --all-projects'
-                }
+                
             }
         }
         // 5. Infrastructure as Code (IaC) Security Scanning with Checkov
         stage('IaC Security Scan with Checkov') {
             steps {
-                script {
+                
                     sh 'docker run --rm -v $(pwd):/workspace checkov -d /workspace'
-                }
+                
             }
         }
 
