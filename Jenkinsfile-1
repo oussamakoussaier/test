@@ -1,25 +1,20 @@
 pipeline {
     agent any
-    environment {
-        NVD_API_KEY = '0bfb1a0f-8c1c-4c46-8dbf-fed7c645828d'  // Add your NVD API Key here
-    }
-    stages {
-        // 1. Git Checkout and Secrets Scan (Trufflehog)
-        stage('Git Checkout and Secrets Scan') {
-            steps {
-                sh 'docker pull gesellix/trufflehog'
-                sh 'docker run -t gesellix/trufflehog --json https://github.com/oussamakoussaier/test.git > trufflehog'
+         environment {
+        NVD_API_KEY = '0bfb1a0f-8c1c-4c46-8dbf-fed7c645828d'  
             }
+        stages {
+            stage('Git Checkout and Secrets Scan') {
+                steps {
+                    sh 'docker pull gesellix/trufflehog'
+                    sh 'docker run -t gesellix/trufflehog --json https://github.com/oussamakoussaier/test.git > trufflehog'
+                  }
         }
-
-        // 2. Dependency Check (SCA)
-        stage('Dependency Check') {
-            steps {
+            stage('Dependency Check') {
+                steps {
                 dependencyCheck additionalArguments: '--format HTML --nvdApiKey $NVD_API_KEY', odcInstallation: 'DP-check'
             }
         }
-
-        // 3. Static Application Security Testing (SAST)
         stage('SAST with CodeQL') {
             steps {
                 script {
@@ -27,7 +22,6 @@ pipeline {
                 }
             }
         }
-
         // 4. Software Composition Analysis (SCA) with Snyk
         stage('SCA with Snyk') {
             steps {
@@ -36,7 +30,6 @@ pipeline {
                 }
             }
         }
-
         // 5. Infrastructure as Code (IaC) Security Scanning with Checkov
         stage('IaC Security Scan with Checkov') {
             steps {
@@ -46,81 +39,79 @@ pipeline {
             }
         }
 
-        // 6. Dynamic Application Security Testing (DAST) with OWASP ZAP
-        stage('Integration Testing and DAST with OWASP ZAP') {
-            steps {
-                script {
-                    sh 'docker run -d -p 8080:8080 --name zaproxy --network mynetwork zaproxy/zap-stable zap.sh -daemon -port 8080 -config api.disablekey=true'
-                    sleep 30
-                    sh """
-                    curl -X POST http://localhost:8080/JSON/ascan/action/scan \
-                    -d 'url=https://github.com/oussamakoussaier/test.git' \
-                    -d 'recurse=true' \
-                    -d 'inScopeOnly=false' \
-                    -d 'scanContext=default'
-                    """
-                    sh 'mvn verify -DskipUnitTests'
-                    sh 'docker stop zaproxy'
-                }
-            }
-        }
+            stage('Integration Testing and DAST with OWASP ZAP') {
+                steps {
+                    script {
+                        sh 'docker run -d -p 8080:8080 --name zaproxy --network mynetwork zaproxy/zap-stable zap.sh -daemon -port 8080 -config api.disablekey=true'
+            
+                        sleep 30
+            
+                        sh """
+                        curl -X POST http://localhost:8080/JSON/ascan/action/scan \
+                        -d 'url=https://github.com/oussamakoussaier/test.git' \
+                        -d 'recurse=true' \
+                        -d 'inScopeOnly=false' \
+                        -d 'scanContext=default'
+                        """
+            
+                        sh 'mvn verify -DskipUnitTests'
 
-        // 7. Static Code Analysis with SonarQube
-        stage('Static Code Analysis') {
-            steps {
-                script {
-                    withSonarQubeEnv(credentialsId: 'sonar-api-key') {
-                        sh 'mvn clean package sonar:sonar'
+                        sh 'docker stop zaproxy'
+
                     }
                 }
             }
-        }
-
-        // 8. Quality Gate Status (SonarQube)
-        stage('Quality Gate Status') {
-            steps {
-                script {
-                    waitForQualityGate abortPipeline: true, credentialsId: 'sonar-api-key'
+            stage('Static Code Analysis') {
+                steps {
+                    script {
+                        withSonarQubeEnv(credentialsId: 'sonar-api-key') {
+                        sh 'mvn clean package sonar:sonar'
+                            }
+                        }
+                    }
+                }
+            stage('Quality Gate Status') {
+                steps {
+                    script {
+                        waitForQualityGate abortPipeline: true, credentialsId: 'sonar-api-key'
+                    }
                 }
             }
-        }
-
-        // 9. Upload WAR file to Nexus Repository
-        stage('Upload War File to Nexus') {
-            steps {
-                script {
-                    nexusArtifactUploader artifacts: [
-                        [artifactId: 'tp-foyer',
-                         classifier: '', 
-                         file: 'target/tp-foyer-5.0.0.jar',
-                         type: 'jar']
-                    ],
-                    credentialsId: 'nexus-auth',
-                    groupId: 'tn.esprit',
-                    nexusUrl: '192.168.33.10:8081',
-                    nexusVersion: 'nexus3', 
-                    protocol: 'http',
-                    repository: 'demoapp-release',
-                    version: '1.0'
+            stage('Upload War File to Nexus') {
+                steps {
+                    script {
+                        //def readPomVersion = readMavenPom file: 'pom.xml'
+                        //def nexusRepo = readPomVersion.version.endsWith('SNAPSHOT') ? "demoapp-snapshot" : "demoapp-release"
+                        nexusArtifactUploader artifacts: [
+                            [artifactId: 'tp-foyer',
+                             classifier: '', 
+                             file: 'target/tp-foyer-5.0.0.jar',
+                             type: 'jar']
+                        ],
+                        credentialsId: 'nexus-auth',
+                        groupId: 'tn.esprit',
+                        nexusUrl: '192.168.33.10:8081',
+                        nexusVersion: 'nexus3', 
+                        protocol: 'http',
+                        repository: 'demoapp-release',
+                        version: '1.0'
+                    }
                 }
             }
-        }
-
-        // 10. Docker Image Build and Security Scan with Trivy
-        stage('Docker Image Build and Security Scan') {
-            steps {
-                script {
-                    // Build the Docker image
-                   // sh "docker build -t $JOB_NAME:v1.$BUILD_ID ."
-
-                    // Run Trivy container security scan for vulnerabilities
-                  //  sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --severity HIGH,CRITICAL --no-progress --scanners vuln --db-repository "ghcr.io/aquasecurity/trivy-db:2,public.ecr.aws/aquasecurity/trivy-db" $JOB_NAME:v1.$BUILD_ID'
-
-                    // Tag the Docker image
-                  //  sh "docker tag $JOB_NAME:v1.$BUILD_ID oussama769/$JOB_NAME:v1.$BUILD_ID"
-                  //  sh "docker tag $JOB_NAME:v1.$BUILD_ID oussama769/$JOB_NAME:latest"
+            stage('Docker Image Build and Security Scan') {
+                steps {
+                    script {
+                        // Build the Docker image
+                        //sh "docker build -t $JOB_NAME:v1.$BUILD_ID ."
+            // Run Trivy container security scan
+                        //sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --severity HIGH,CRITICAL --no-progress --scanners vuln --db-repository "ghcr.io/aquasecurity/trivy-db:2,public.ecr.aws/aquasecurity/trivy-db" alpine:latest'
+            // Tag the Docker image
+                        //sh "docker tag $JOB_NAME:v1.$BUILD_ID oussama769/$JOB_NAME:v1.$BUILD_ID"
+                        //sh "docker tag $JOB_NAME:v1.$BUILD_ID oussama769/$JOB_NAME:latest"
+                    }
                 }
             }
-        }
+
+
     }
 }
