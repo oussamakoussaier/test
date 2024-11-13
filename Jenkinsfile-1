@@ -19,9 +19,9 @@ pipeline {
             steps {
                 script {
                     sh 'docker run --rm -v $(pwd):/src github/codeql/codeql-cli:latest --scan /src'
+                    }
                 }
             }
-        }
         // 4. Software Composition Analysis (SCA) with Snyk
         stage('SCA with Snyk') {
             steps {
