@@ -3,13 +3,14 @@ pipeline {
          environment {
         NVD_API_KEY = '0bfb1a0f-8c1c-4c46-8dbf-fed7c645828d'  
             }
-        stages {
-            stage('Git Checkout and Secrets Scan') {
-                steps {
-                    sh 'docker pull gesellix/trufflehog'
-                    sh 'docker run -t gesellix/trufflehog --json https://github.com/devopssecure/webapp.git > trufflehog'
+        
+        stage('Git Checkout and Secrets Scan') {
+            steps {
+                sh 'docker pull gesellix/trufflehog'
+                sh 'docker run -t gesellix/trufflehog --json https://github.com/devopssecure/webapp.git > trufflehog'
                   }
-        }
+            }
+        
         stage('Dependency Check') {
             steps {
                 dependencyCheck additionalArguments: '--format HTML --nvdApiKey $NVD_API_KEY', odcInstallation: 'DP-check'
@@ -66,7 +67,7 @@ pipeline {
                 steps {
                     script {
                         withSonarQubeEnv(credentialsId: 'sonar-api-key') {
-                        sh 'mvn clean package sonar:sonar'
+                            sh 'mvn clean package sonar:sonar'
                             }
                         }
                     }
@@ -113,4 +114,4 @@ pipeline {
 
 
     }
-}
+
