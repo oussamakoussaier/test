@@ -1,4 +1,4 @@
-FROM alpine:latest as build
+FROM alpine:latest 
 WORKDIR /app
 COPY  . .
 RUN mvn install
