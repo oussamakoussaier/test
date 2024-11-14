@@ -20,7 +20,7 @@ pipeline {
                     sh '''
                         docker run --rm \
                             -v /var/jenkins_home/workspace/devsecops:/src \
-                            codeql-container \
+                            mcr.microsoft.com/cstsectools/codeql-container \
                             bash -c "codeql database create /src/codeql-database --language=java --source-root /src"
                     '''
 
@@ -28,7 +28,7 @@ pipeline {
                     sh '''
                         docker run --rm \
                             -v /var/jenkins_home/workspace/devsecops:/src \
-                            codeql-container \
+                            mcr.microsoft.com/cstsectools/codeql-container \
                             bash -c "codeql database analyze /src/codeql-database --format=csv --output=/src/codeql-results.csv --query=codeql-repo/queries"
                     '''
 
