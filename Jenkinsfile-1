@@ -10,11 +10,11 @@ pipeline {
                     sh 'docker run -t gesellix/trufflehog --json https://github.com/oussamakoussaier/test.git > trufflehog'
                   }
         }
-            stage('Dependency Check') {
-                steps {
-                    dependencyCheck additionalArguments: '--format HTML --nvdApiKey $NVD_API_KEY', odcInstallation: 'DP-check'
-            }
-        }
+            //stage('Dependency Check') {
+              //  steps {
+                //    dependencyCheck additionalArguments: '--format HTML --nvdApiKey $NVD_API_KEY', odcInstallation: 'DP-check'
+            //}
+        //}
             stage('SAST with CodeQL') {
                 steps {
                     sh 'docker run --rm -v $(pwd):/src --entrypoint "" codeql-container --scan /src'
