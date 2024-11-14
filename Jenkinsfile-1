@@ -24,6 +24,11 @@ pipeline {
                 steps {
                     sh 'docker run --rm snyk/snyk:alpine test --all-projects'    
             }
+            stage('IaC Security Scan with Checkov') {
+                steps {
+                    sh 'docker run --rm -v $(pwd):/workspace checkov -d /workspace'
+                }
+            }
             stage('Integration Testing and DAST with OWASP ZAP') {
                 steps {
                     script {
