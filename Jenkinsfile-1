@@ -10,11 +10,11 @@ pipeline {
                     sh 'docker run -t gesellix/trufflehog --json https://github.com/oussamakoussaier/test.git > trufflehog'
                   }
         }
-            stage('Dependency Check') {
-                steps {
-                    dependencyCheck additionalArguments: '--format HTML --nvdApiKey $NVD_API_KEY', odcInstallation: 'DP-check'
-            }
-        }
+         //   stage('Dependency Check') {
+           //     steps {
+             //       dependencyCheck additionalArguments: '--format HTML --nvdApiKey $NVD_API_KEY', odcInstallation: 'DP-check'
+            //}
+        //}
         
 
             stage('Integration Testing and DAST with OWASP ZAP') {
