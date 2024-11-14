@@ -15,8 +15,14 @@ pipeline {
                     dependencyCheck additionalArguments: '--format HTML --nvdApiKey $NVD_API_KEY', odcInstallation: 'DP-check'
             }
         }
-        
+            stage('SAST with CodeQL') {
+                steps {
+                    sh 'docker run --rm -v $(pwd):/src mcr.microsoft.com/cstsectools/codeql-container --scan /src'  
+                }
+            }
 
+
+//
             stage('Integration Testing and DAST with OWASP ZAP') {
                 steps {
                     script {
