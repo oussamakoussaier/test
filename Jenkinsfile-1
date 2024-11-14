@@ -17,13 +17,16 @@ pipeline {
         //}
             stage('SAST with CodeQL') {
                 steps {
-                                        // Step 1: Run the container as root and create the CodeQL database
+                    // Step 1: Run the container as root and create the CodeQL database
                     sh '''
-                        docker run  --rm -u root -v /var/jenkins_home/workspace/devsecops:/src --entrypoint /bin/bash mcr.microsoft.com/cstsectools/codeql-container -c "
+                        docker run --rm -u root -v /var/jenkins_home/workspace/devsecops:/src --entrypoint /bin/bash mcr.microsoft.com/cstsectools/codeql-container -c "
                             chmod +x /usr/local/startup_scripts/setup.py && \
                             codeql database create /src/codeql-database --language=java --source-root /src
                         "
                     '''
+
+                    // Debugging: Check if the database is created successfully
+                    sh 'ls /var/jenkins_home/workspace/devsecops/codeql-database'
 
                     // Step 2: Run CodeQL queries on the created database
                     sh '''
