@@ -19,7 +19,7 @@ pipeline {
                 steps {
                                         // Step 1: Run the container as root and create the CodeQL database
                     sh '''
-                        docker run -it --rm -u root -v /var/jenkins_home/workspace/devsecops:/src --entrypoint /bin/bash mcr.microsoft.com/cstsectools/codeql-container -c "
+                        docker run  --rm -u root -v /var/jenkins_home/workspace/devsecops:/src --entrypoint /bin/bash mcr.microsoft.com/cstsectools/codeql-container -c "
                             chmod +x /usr/local/startup_scripts/setup.py && \
                             codeql database create /src/codeql-database --language=java --source-root /src
                         "
