@@ -9,7 +9,7 @@ COPY --from=build /app/target/tp-foyer-5.0.0.jar /app/
 EXPOSE 9090
 CMD ["java", "-jar","tp-foyer-5.0.0.jar"]
 
-FROM base
+FROM alpine:3.20.3
 RUN useradd -m appuser
 USER appuser
 LABEL foo="bar baz
