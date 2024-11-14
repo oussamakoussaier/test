@@ -17,7 +17,23 @@ pipeline {
         //}
             stage('SAST with CodeQL') {
                 steps {
-                    sh 'docker run --rm -v /var/jenkins_home/workspace/devsecops:/src --entrypoint "codeql" codeql-container --scan /src'
+                    sh '''
+                        docker run --rm \
+                            -v /var/jenkins_home/workspace/devsecops:/src \
+                            mcr.microsoft.com/cstsectools/codeql-container \
+                            bash -c "codeql database create /src/codeql-database --language=java --source-root /src"
+                    '''
+
+                    // Step 2: Run CodeQL queries on the created database
+                    sh '''
+                        docker run --rm \
+                            -v /var/jenkins_home/workspace/devsecops:/src \
+                            mcr.microsoft.com/cstsectools/codeql-container \
+                            bash -c "codeql database analyze /src/codeql-database --format=csv --output=/src/codeql-results.csv --query=codeql-repo/queries"
+                    '''
+
+                    // Step 3: Check or process results (optional)
+                    sh 'cat /src/codeql-results.csv'
 
                     
                 }
