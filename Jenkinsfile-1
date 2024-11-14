@@ -17,7 +17,7 @@ pipeline {
         //}
             stage('SAST with CodeQL') {
                 steps {
-                    sh 'docker run --rm -v $(pwd):/src --entrypoint "" codeql-container --scan /src'
+                    sh 'docker run --rm -v /var/jenkins_home/workspace/devsecops:/src --entrypoint "codeql" codeql-container --scan /src'
 
                     
                 }
