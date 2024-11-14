@@ -25,7 +25,10 @@ pipeline {
         }
             stage('IaC Security Scan with Checkov') {
                 steps {
+                    script {
                     sh 'docker run --rm -v $(pwd):/workspace 0d4937aefd04 -d /workspace --quiet --compact'
+                    echo "Checkov scan completed with status: ${checkovStatus}"
+                    }
                 }
             }
             stage('Integration Testing and DAST with OWASP ZAP') {
