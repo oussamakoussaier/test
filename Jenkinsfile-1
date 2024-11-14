@@ -15,48 +15,15 @@ pipeline {
                 //    dependencyCheck additionalArguments: '--format HTML --nvdApiKey $NVD_API_KEY', odcInstallation: 'DP-check'
             //}
         //}
-            stage('SAST with CodeQL') {
-                steps {
-                sh '''
-                    docker run --rm -u root -v /var/jenkins_home/workspace/devsecops:/src --entrypoint /bin/bash mcr.microsoft.com/cstsectools/codeql-container -c "
-                    # Install CodeQL CLI (if it's not already installed)
-                    apt-get update && apt-get install -y curl && \
-                    curl -sSL https://github.com/github/codeql-cli-binaries/releases/download/v2.13.0/codeql-linux64.zip -o /tmp/codeql-linux64.zip && \
-                    unzip /tmp/codeql-linux64.zip -d /opt && \
-                    ln -s /opt/codeql/codeql /usr/local/bin/codeql && \
-    
-                    # Install Java (OpenJDK 17)
-                    apt-get install -y openjdk-17-jdk maven && \
-    
-                    # Set JAVA_HOME environment variable
-                    export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 && \
-                    export PATH=$JAVA_HOME/bin:$PATH && \
-    
-                    # Verify installations
-                    java -version && \
-                    codeql --version && \
-    
-                    # Create CodeQL database
-                    chmod +x /usr/local/startup_scripts/setup.py && \
-                    codeql database create /src/codeql-database --language=java --source-root /src --overwrite
-                    "
-                    '''
-                    // Debugging: Check if the database is created successfully
-                    sh 'ls /var/jenkins_home/workspace/devsecops/codeql-database'
 
-                    // Step 2: Run CodeQL queries on the created database
-                    sh '''
-                    docker run --rm -u root -v /var/jenkins_home/workspace/devsecops:/src --entrypoint /bin/bash mcr.microsoft.com/cstsectools/codeql-container \
-                     -c "codeql database analyze /src/codeql-database --format=csv --output=/src/codeql-results.csv "
-                    '''
-
-                    // Step 3: Process or check the results (optional)
-                    sh 'cat /src/codeql-results.csv'
                 }
             }
 
-
-//
+        // 4. Software Composition Analysis (SCA) with Snyk
+            stage('SCA with Snyk') {
+                steps {
+                    sh 'docker run --rm snyk/snyk:alpine test --all-projects'    
+            }
             stage('Integration Testing and DAST with OWASP ZAP') {
                 steps {
                     script {
