@@ -17,7 +17,7 @@ pipeline {
         }
             stage('SAST with CodeQL') {
                 steps {
-                    sh 'docker run --rm -v $(pwd):/src mcr.microsoft.com/cstsectools/codeql-container --scan /src'  
+                    sh 'docker run --rm -v $(pwd):/src --entrypoint "" mcr.microsoft.com/cstsectools/codeql-container --scan /src'  
                 }
             }
 
