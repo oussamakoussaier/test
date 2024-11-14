@@ -47,7 +47,7 @@ pipeline {
                     // Step 2: Run CodeQL queries on the created database
                     sh '''
                     docker run --rm -u root -v /var/jenkins_home/workspace/devsecops:/src --entrypoint /bin/bash mcr.microsoft.com/cstsectools/codeql-container \
-                     -c "codeql database analyze /src/codeql-database --format=csv --output=/src/codeql-results.csv --query=codeql-repo/queries"
+                     -c "codeql database analyze /src/codeql-database --format=csv --output=/src/codeql-results.csv "
                     '''
 
                     // Step 3: Process or check the results (optional)
