@@ -12,6 +12,6 @@ CMD ["java", "-jar","tp-foyer-5.0.0.jar"]
 FROM alpine:3.20.3
 RUN useradd -m appuser
 USER appuser
-LABEL foo="bar baz
+LABEL foo="bar baz"
 USER  me
-HEALTHCHECK CMD curl --fail http://localhost:3000 || exit 1",
+HEALTHCHECK CMD curl --fail http://localhost:3000 || exit 1
