@@ -16,8 +16,6 @@ pipeline {
             }
         }
 
-
-        // 4. Software Composition Analysis (SCA) with Snyk
             stage('SCA with Snyk') {
                 steps {
                     sh 'docker run --rm snyk/snyk:alpine test --all-projects'    
