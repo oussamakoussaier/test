@@ -1,5 +1,5 @@
 # Stage 1: Build the app
-FROM alpine:3.20.3 AS build
+FROM alpine:3.23.2 AS build
 WORKDIR /app
 COPY . .
 RUN mvn install
@@ -12,7 +12,7 @@ EXPOSE 9090
 CMD ["java", "-jar", "tp-foyer-5.0.0.jar"]
 
 # Stage 3: Set up a user in a clean Alpine image
-FROM alpine:3.20.3
+FROM alpine:3.23.2
 
 # Install shadow package for useradd
 RUN apk add --no-cache shadow
